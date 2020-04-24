@@ -55,7 +55,10 @@ gp = df.groupby(['Project']).sum()
 print(gp)
 gp.to_excel('Stats_pandas_sum.xlsx', sheet_name='Sum')
 
-
+# filename = tk.askopenfilename(initialdir=default_dir, title="please select a file to process", \
+#                              filetypes=[('xlsx', '*.xlsx'), ('All Files', '*')],)
+# 打开结果所在目录：
+os.startfile(default_dir)
 
 
 
