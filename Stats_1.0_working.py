@@ -81,6 +81,7 @@ for file in result:
     ws = wb['Sheet1']
 
     max_row = ws.max_row
+    max_col = ws.max_col
 
     for row in range(28, max_row, 16):
         project_name = ws.cell(row=2, column=2).value
