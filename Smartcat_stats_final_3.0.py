@@ -4,17 +4,21 @@
 # @Email   : mikelgh@live.com
 # @File    : Smartcat_stats_final.py
 # @Version : 3.0
-# @notes: 解决 只适用于仅包含 Lithium/Petchems/WeChat2/SMD 的文件夹，因为不能区分同为Wechat的ad hoc项目
+# @notes: 解决 适用于任何月份文件夹，自动分出4个regular projects并放在相应工作表+总计行
 # @Software: PyCharm
 #
 
 
 import os
 import tkinter.filedialog as tk
+from typing import Any, Union
+
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import re
 import pandas as pd
+from datetime import datetime
+from pandas import Series, DataFrame
 
 
 def Choose_dir():
@@ -27,8 +31,8 @@ def Choose_dir():
         return "error"
 
 
-def Create_stats_file():
-    dest_filename = 'Stats.xlsx'
+def Create_stats_file(dest_filename):
+    dest_filename = dest_filename
     wb = Workbook()
     ws = wb.active
     ws.title = 'Stats'
@@ -149,18 +153,51 @@ def Sort_Sum(dest_filename):
     nrows = df.shape[0]
     ncols = df.columns.size
     df.shape
+
+    # 按项目名、文件名排序
     df_sort = df.sort_values(["Project", 'File name'])
+    # 按项目分类求和
     df_sum = df_sort.groupby(['Project']).sum()
+    df_sum_sum = df_sum.groupby(['Type']).sum()
+    df_sum = df_sum.append(df_sum_sum)
+
+    df_lithium_sum = df_sort[df_sort['Project'] == "ZH_Lithium Battery"]
+    #各列求和并添加到末尾
+    df_lithium_sum1 = df_lithium_sum.groupby(['Project']).sum()
+    df_lithium_sum = df_lithium_sum.append(df_lithium_sum1)
+
+    df_petchems_sum = df_sort[df_sort['Project'] == "ZH_Petchems"]
+    # 各列求和并添加到末尾
+    df_petchems_sum1 = df_petchems_sum.groupby(['Project']).sum()
+    df_petchems_sum = df_petchems_sum.append(df_petchems_sum1)
+
+
+    df_smd_sum = df_sort[df_sort['Project'] == "ZH_SteelMarketsDaily"]
+    # 各列求和并添加到末尾
+    df_smd_sum1 = df_smd_sum.groupby(['Project']).sum()
+    df_smd_sum = df_smd_sum.append(df_smd_sum1)
+
+    df_hrcrebar_sum = df_sort[(df_sort['File name'].str.contains("HRC"))|(df_sort['File name'].str.contains("Rebar"))]
+    # 各列求和并添加到末尾
+    df_hrcrebar_sum1 = df_hrcrebar_sum.groupby(['Project']).sum()
+    df_hrcrebar_sum = df_hrcrebar_sum.append(df_hrcrebar_sum1)
+
     # pandas writer 方法可以同时向一个工作簿写入多个工作表
     writer = pd.ExcelWriter(dest_filename)
     df_sort.to_excel(writer, 'Stats')
     df_sum.to_excel(writer, 'Sum')
+    df_lithium_sum.to_excel(writer, 'Lithium')
+    df_petchems_sum.to_excel(writer, 'Petchems')
+    df_smd_sum.to_excel(writer, 'SMD')
+    df_hrcrebar_sum.to_excel(writer, 'HRC & Rebar')
     writer.save()
 
 
 def main():
     fdir = Choose_dir()
-    dest_filename = Create_stats_file()
+
+    dest_filename = 'Stats_'+datetime.now().strftime("%Y-%m-%d_%H%M%S")+'.xlsx'
+    Create_stats_file(dest_filename)
     Extract_stats(fdir, dest_filename)
     Sort_Sum(dest_filename)
     os.startfile(fdir)
