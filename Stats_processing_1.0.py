@@ -53,12 +53,19 @@ df = df.sort_values(["Project",'File name'])
 # 成功生成各项目的字数合计数 2020-04-22
 gp = df.groupby(['Project']).sum()
 print(gp)
-gp.to_excel('Stats_pandas_sum.xlsx', sheet_name='Sum')
+sum_file = 'Stats_pandas_sum.xlsx'
+
+gp.to_excel(sum_file, sheet_name='Sum')
 
 # filename = tk.askopenfilename(initialdir=default_dir, title="please select a file to process", \
 #                              filetypes=[('xlsx', '*.xlsx'), ('All Files', '*')],)
 # 打开结果所在目录：
 os.startfile(default_dir)
+# 直接打开结果文件？
+os.startfile(sum_file)
+
+
+
 
 
 
